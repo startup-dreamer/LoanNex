@@ -62,8 +62,6 @@
 
 ## About The Project
 
-![Product Name Screen Shot][product-screenshot]
-
 - LoanNex offers a peer-to-peer lending platform, giving you the power to create a tailored solution for your specific needs.
 - You have the freedom to select collateral, interest rates, duration, installments, and the crypto asset that aligns with your preferences.
 - The platform generates a unique receipt in the form of financial NFTs for both parties involved (lender or borrower).
@@ -82,9 +80,20 @@
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Protocol Schema
+![schema](./assets/schema.png)
+
 <!-- USAGE EXAMPLES -->
+## Demo screenshots
+### Cover Page
+![Coverpage](./assets/coverPage.png)
+### NFT
+![NFT](./assets/LoanNexNFT.png)
 
 ## How is it Made?
+**Smart contracts** Made with solidity for EVM compatible chains deployed to XDC Apothem Network
+
+**Frontend** Made with react
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
