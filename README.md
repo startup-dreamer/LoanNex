@@ -128,7 +128,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ## Contact
 
-Shashank Trivedi - [@krieger](https://twitter.com/Startup_dmr)
+[@krieger](https://twitter.com/Startup_dmr)
 
 Project Link: [https://github.com/startup-dreamer/LoanNex](https://github.com/startup-dreamer/LoanNex)
 
