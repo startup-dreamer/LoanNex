@@ -16,7 +16,7 @@ module.exports = {
   networks: {
     xdcTestnet: {
       url: 'https://erpc.apothem.network',
-      accounts: ['c6b715d8e42367ccf6992b7a8c787ba4ed4c0b44c467b0af6fecc888a6023813'],
+      accounts: [''],
     },
     maticTestnet: {
       url: process.env.MATIC_TESTNET || "",
