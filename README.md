@@ -75,8 +75,8 @@
 
 - [![React][react.js]][react-url]
 - [Hardhat]('https://hardhat.org/')
-- [LoanNex]('') (xdc deployment link) `xdc460549b7EFA61c8410ff82fBd239Fe8bf0C95F12`
-- [LoanNexNFT]('') (xdc deployment link) `xdcFb202edA635856905E435a3127de525B8D3e7EDb`
+- [LoanNex]('https://explorer.apothem.network/address/xdc460549b7EFA61c8410ff82fBd239Fe8bf0C95F12#transactions') (xdc deployment link) `xdc460549b7EFA61c8410ff82fBd239Fe8bf0C95F12`
+- [LoanNexNFT]('https://explorer.apothem.network/address/xdcFb202edA635856905E435a3127de525B8D3e7EDb#transactions') (xdc deployment link) `xdcFb202edA635856905E435a3127de525B8D3e7EDb`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
