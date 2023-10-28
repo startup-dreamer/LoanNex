@@ -81,14 +81,15 @@
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Protocol Schema
-![schema](https://github.com/startup-dreamer/LoanNex/blob/main/assets/schema.png)
+<img src="./assets/schema.png" alt="schema">
 
 <!-- USAGE EXAMPLES -->
 ## Demo screenshots
 ### Cover Page
-![Coverpage](https://github.com/startup-dreamer/LoanNex/blob/main/assets/coverPage.png)
+<img src="./assets/coverPage.png" alt="Coverpage">
+
 ### NFT
-![NFT](https://github.com/startup-dreamer/LoanNex/blob/main/assets/LoanNexNFT.png)
+<img src="./assets/LoanNexNFT.png" alt="NFT">
 
 ## How is it Made?
 **Smart contracts** Made with solidity for EVM compatible chains deployed to XDC Apothem Network
