@@ -9,21 +9,19 @@ import "./LoanNexNFT.sol";
 contract LoanNex is Ownable, ERC1155Holder {
     // Time period for the loan in seconds
     uint256 constant COUNTDOWN_PERIOD = 12 hours;
-    // Id of the Lender Offer ID
+
+    // Counters
     uint256 public lenderRegistryId;
-    // Id of the Collateral Offer ID
     uint256 public lastCollateralOfferId;
+    uint256 public loanCounter;
+    uint32 public nftCounter;
 
-    uint256 public LOAN_ID;
     // Address of the NFT Contract
-    address loanNexNFT;
-    // Id count of the ownership NFT minted
-    uint32 NFT_ID;
-
+    address public loanNexNFT;
     bool private initialized;
 
-    // Lender & Collateral struct is the same right now, will be one  --> struct OfferInfo {}
-    struct LenderOInfo {
+    // Lender Offer Information
+    struct LenderOfferInfo {
         address lenderToken;
         address[] wantedCollateralTokens;
         uint256[] wantedCollateralAmount;
@@ -35,7 +33,8 @@ contract LoanNex is Ownable, ERC1155Holder {
         address owner;
     }
 
-    struct CollateralOInfo {
+    // Collateral Offer Information
+    struct CollateralOfferInfo {
         address requireLenderToken;
         address[] collaterals;
         uint256[] collateralAmount;
@@ -47,8 +46,9 @@ contract LoanNex is Ownable, ERC1155Holder {
         address owner;
     }
 
+    // Loan Information
     struct LoanInfo {
-        uint32 collateralOwnerID;
+        uint32 collateralOwnerId;
         uint32 lenderOwnerId;
         address lenderToken;
         uint256 cooldown;
@@ -64,17 +64,14 @@ contract LoanNex is Ownable, ERC1155Holder {
         bool executed;
     }
 
-    // Lender ID => All Info About the Offer
-    mapping(uint256 => LenderOInfo) internal LendersOffers;
-    // Collateral ID => All Info About the Collateral
-    mapping(uint256 => CollateralOInfo) internal CollateralOffers;
-    // Loan ID => All Info about the Loan
+    // Mappings
+    mapping(uint256 => LenderOfferInfo) internal LendersOffers;
+    mapping(uint256 => Collateral) internal CollateralOffers;
     mapping(uint256 => LoanInfo) internal Loans;
-    // NFT ID => Loan ID
     mapping(uint256 => uint256) public loansByNft;
-    // NFT ID => CLAIMEABLE DEBT
     mapping(uint256 => uint256) public claimeableDebt;
 
+    // Events
     event LenderOfferCreated(
         uint256 indexed lenderRegistryId,
         address indexed owner,
@@ -112,7 +109,7 @@ contract LoanNex is Ownable, ERC1155Holder {
      * @param paymentCount_ The number of payments expected from the borrower.
      * @param whitelist_ An array of whitelisted addresses.
      */
-    function createLenderOption(
+    function offerLenderLoan(
         address lenderToken_,
         address[] memory wantedCollateralTokens_,
         uint256[] memory wantedCollateralAmount_,
@@ -130,10 +127,10 @@ contract LoanNex is Ownable, ERC1155Holder {
         );
 
         if (lenderToken_ == address(0x0)) {
-            // If the lender's token is XDR (address(0x0)), check if the transaction value is greater than or equal to the lender amount
+            // If the lender's token is XDC (address(0x0)), check if the transaction value is greater than or equal to the lender amount
             require(msg.value >= lenderAmount_);
         } else {
-            // If the lender's token is not XDR, transfer the lender amount from the sender to the contract address
+            // If the lender's token is not XDC, transfer the lender amount from the sender to the contract address
             IERC20 _landerToken = IERC20(lenderToken_);
             // Check Taxable Tokens --> If it's taxable token, revert
             uint256 balanceBefore = _landerToken.balanceOf(address(this));
@@ -144,8 +141,8 @@ contract LoanNex is Ownable, ERC1155Holder {
         }
 
         lenderRegistryId++;
-        // Create a new LenderOInfo struct with the provided information
-        LenderOInfo memory lastLender = LenderOInfo({
+        // Create a new LenderOfferInfo struct with the provided information
+        LenderOfferInfo memory lastLender = LenderOfferInfo({
             lenderToken: lenderToken_,
             wantedCollateralTokens: wantedCollateralTokens_,
             wantedCollateralAmount: wantedCollateralAmount_,
@@ -162,7 +159,7 @@ contract LoanNex is Ownable, ERC1155Holder {
 
     // Cancel Lender Offer
     function cancelLenderOffer(uint256 lenderRegistryId_) public {
-        LenderOInfo memory lenderInfo = LendersOffers[lenderRegistryId_];
+        LenderOfferInfo memory lenderInfo = LendersOffers[lenderRegistryId_];
         if (lenderInfo.owner != msg.sender) {
             revert();
         }
@@ -210,10 +207,10 @@ contract LoanNex is Ownable, ERC1155Holder {
         uint256 amountWei;
         for (uint256 i; i < collateralTokens_.length; i++) {
             if (collateralTokens_[i] == address(0x0)) {
-                // Check if the collateral token is XDR (address(0x0)) and Sum up the collateral amount in Wei
+                // Check if the collateral token is XDC (address(0x0)) and Sum up the collateral amount in Wei
                 amountWei += collateralAmount_[i];
             } else {
-                // If the collateral token is not XDR, transfer the collateral amount from the sender to the contract address
+                // If the collateral token is not XDC, transfer the collateral amount from the sender to the contract address
                 IERC20 collateralToken = IERC20(collateralTokens_[i]);
                 uint256 balanceBefore = collateralToken.balanceOf(address(this));
                 bool success = collateralToken.transferFrom(msg.sender, address(this), collateralAmount_[i]);
@@ -223,11 +220,11 @@ contract LoanNex is Ownable, ERC1155Holder {
             }
         }
         // Check if the transaction value is greater than or equal to the total collateral amount in Wei
-        require(msg.value >= amountWei, "Not Enough XDR");
+        require(msg.value >= amountWei, "Not Enough XDC");
 
         lastCollateralOfferId++;
-        // Create a new CollateralOInfo struct with the provided information
-        CollateralOInfo memory lastCollateral = CollateralOInfo({
+        // Create a new Collateral struct with the provided information
+        Collateral memory lastCollateral = Collateral({
             requireLenderToken: requireLenderToken_,
             collaterals: collateralTokens_,
             collateralAmount: collateralAmount_,
@@ -245,7 +242,7 @@ contract LoanNex is Ownable, ERC1155Holder {
     }
 
     function cancelCollateralOffer(uint256 id_) public {
-        CollateralOInfo memory collateralInfo = CollateralOffers[id_];
+        Collateral memory collateralInfo = CollateralOffers[id_];
         require(collateralInfo.owner == msg.sender, "Sender is not the owner");
         delete CollateralOffers[id_]; // Deleting info before transfering anything
         // Iterate over the collateral tokens and transfer them back to the owner
@@ -267,7 +264,7 @@ contract LoanNex is Ownable, ERC1155Holder {
      * @param id_ The ID of the collateral offer to accept.
      */
     function acceptCollateralOffer(uint256 id_) public payable {
-        CollateralOInfo memory collateralInfo = CollateralOffers[id_];
+        Collateral memory collateralInfo = CollateralOffers[id_];
         require(collateralInfo.owner != address(0x0), "Offer does not exists.");
         // Check if Whitelist exists and if the sender is whitelisted
 
@@ -283,7 +280,7 @@ contract LoanNex is Ownable, ERC1155Holder {
         // Send Tokens to Collateral Owner
 
         if (collateralInfo.requireLenderToken == address(0x0)) {
-            require(msg.value >= collateralInfo.wantedlenderAmount, "Not Enough XDR");
+            require(msg.value >= collateralInfo.wantedlenderAmount, "Not Enough XDC");
             (bool success,) = collateralInfo.owner.call{value: collateralInfo.wantedlenderAmount}("");
             require(success, "Transaction Error");
         } else {
@@ -295,18 +292,18 @@ contract LoanNex is Ownable, ERC1155Holder {
             require((balanceAfter - balanceBefore) == collateralInfo.wantedlenderAmount, "Taxable Token");
         }
 
-        // Update States & Mint NFTS (ID % 2 == 0 = 'BORROWER' && ID % 2 == 1 = 'LENDER')
-        NFT_ID += 2;
-        LOAN_ID++;
+        // Update States & Mint Nfts (Id % 2 == 0 = 'Borroer' && ID % 2 == 1 = 'Lender')
+        nftCounter += 2;
+        loanCounter++;
         LoanNexNFT loanNex = LoanNexNFT(loanNexNFT);
         for (uint256 i; i < 2; i++) {
             loanNex.mint();
             if (i == 0) {
-                loanNex.transferFrom(address(this), msg.sender, NFT_ID - 1);
-                loansByNft[NFT_ID - 1] = LOAN_ID;
+                loanNex.transferFrom(address(this), msg.sender, nftCounter - 1);
+                loansByNft[nftCounter - 1] = loanCounter;
             } else {
-                loanNex.transferFrom(address(this), collateralInfo.owner, NFT_ID);
-                loansByNft[NFT_ID] = LOAN_ID;
+                loanNex.transferFrom(address(this), collateralInfo.owner, nftCounter);
+                loansByNft[nftCounter] = loanCounter;
             }
             // Transfer to new owners
         }
@@ -323,9 +320,9 @@ contract LoanNex is Ownable, ERC1155Holder {
         uint256 nextDeadline = block.timestamp + collateralInfo.timelap;
 
         // Save Mapping Info
-        Loans[LOAN_ID] = LoanInfo({
-            collateralOwnerID: NFT_ID,
-            lenderOwnerId: NFT_ID - 1,
+        Loans[loanCounter] = LoanInfo({
+            collateralOwnerId: nftCounter,
+            lenderOwnerId: nftCounter - 1,
             lenderToken: collateralInfo.requireLenderToken,
             cooldown: block.timestamp,
             lenderAmount: collateralInfo.wantedlenderAmount,
@@ -340,11 +337,11 @@ contract LoanNex is Ownable, ERC1155Holder {
             executed: false
         });
         emit CollateralOfferDeleted(id_, msg.sender);
-        emit LoanAccepted(LOAN_ID, collateralInfo.requireLenderToken, collateralInfo.collaterals);
+        emit LoanAccepted(loanCounter, collateralInfo.requireLenderToken, collateralInfo.collaterals);
     }
 
     function acceptLenderOffer(uint256 lenderRegistryId_) public payable {
-        LenderOInfo memory lenderInfo = LendersOffers[lenderRegistryId_];
+        LenderOfferInfo memory lenderInfo = LendersOffers[lenderRegistryId_];
         require(lenderInfo.owner != address(0x0), "Offer Expired");
         // Check Whitelist
         if (
@@ -371,20 +368,20 @@ contract LoanNex is Ownable, ERC1155Holder {
             }
         }
 
-        require(msg.value >= amountWei, "Not enough XDR");
+        require(msg.value >= amountWei, "Not enough XDC");
         // Update States & Mint NFTS
-        NFT_ID += 2;
-        LOAN_ID++;
+        nftCounter += 2;
+        loanCounter++;
         LoanNexNFT loanNex = LoanNexNFT(loanNexNFT);
 
         for (uint256 i; i < 2; i++) {
             loanNex.mint();
             if (i == 0) {
-                loanNex.transferFrom(address(this), lenderInfo.owner, NFT_ID - 1);
-                loansByNft[NFT_ID - 1] = LOAN_ID;
+                loanNex.transferFrom(address(this), lenderInfo.owner, nftCounter - 1);
+                loansByNft[nftCounter - 1] = loanCounter;
             } else {
-                loanNex.transferFrom(address(this), msg.sender, NFT_ID);
-                loansByNft[NFT_ID] = LOAN_ID;
+                loanNex.transferFrom(address(this), msg.sender, nftCounter);
+                loansByNft[nftCounter] = loanCounter;
             }
         }
 
@@ -395,9 +392,9 @@ contract LoanNex is Ownable, ERC1155Holder {
         uint256 globalDeadline = (lenderInfo.paymentCount * lenderInfo.timelap) + block.timestamp;
         uint256 nextDeadline = block.timestamp + lenderInfo.timelap;
         // Store loan information in the mapping
-        Loans[LOAN_ID] = LoanInfo({
-            collateralOwnerID: NFT_ID,
-            lenderOwnerId: NFT_ID - 1,
+        Loans[loanCounter] = LoanInfo({
+            collateralOwnerId: nftCounter,
+            lenderOwnerId: nftCounter - 1,
             lenderToken: lenderInfo.lenderToken,
             cooldown: block.timestamp,
             lenderAmount: lenderInfo.lenderAmount,
@@ -422,7 +419,7 @@ contract LoanNex is Ownable, ERC1155Holder {
         }
 
         emit LenderOfferDeleted(lenderRegistryId_, msg.sender);
-        emit LoanAccepted(LOAN_ID, lenderInfo.lenderToken, lenderInfo.wantedCollateralTokens);
+        emit LoanAccepted(loanCounter, lenderInfo.lenderToken, lenderInfo.wantedCollateralTokens);
     }
 
     function payDebt(uint256 lenderRegistryId_) public payable {
@@ -431,13 +428,8 @@ contract LoanNex is Ownable, ERC1155Holder {
 
         // Check conditions for valid debt payment
         // Revert the transaction if any condition fail
-
-        // 1. Check if the loan final deadline has passed
-        // 2. Check if the sender is the owner of the collateral associated with the loan
-        // 3. Check if all payments have been made for the loan
-        // 4. Check if the loan collateral has already been executed
         if (
-            loan.deadline < block.timestamp || ownerContract.ownerOf(loan.collateralOwnerID) != msg.sender
+            loan.deadline < block.timestamp || ownerContract.ownerOf(loan.collateralOwnerId) != msg.sender
                 || loan.paymentsPaid == loan.paymentCount || loan.executed == true
         ) {
             revert();
@@ -466,10 +458,6 @@ contract LoanNex is Ownable, ERC1155Holder {
     function claimCollateralasLender(uint256 lenderRegistryId_) public {
         LoanInfo memory loan = Loans[lenderRegistryId_];
         LoanNexNFT ownerContract = LoanNexNFT(loanNexNFT);
-        // 1. Check if the sender is the owner of the lender's NFT
-        // 2. Check if the deadline for the next payment has passed
-        // 3. Check if all payments have been made for the loan
-        // 4. Check if the loan has already been executed
         if (
             ownerContract.ownerOf(loan.lenderOwnerId) != msg.sender || loan.deadlineNext > block.timestamp
                 || loan.paymentCount == loan.paymentsPaid || loan.executed == true
@@ -484,7 +472,7 @@ contract LoanNex is Ownable, ERC1155Holder {
         // Iterate over the collateralTokens and collateralAmount arrays in the loan
         for (uint256 i; i < loan.collaterals.length; i++) {
             if (loan.collaterals[i] == address(0x0)) {
-                // Check if the collateral token is XDR (address(0x0))
+                // Check if the collateral token is XDC (address(0x0))
                 // Sum up the collateral amount in Wei
                 amountWei += loan.collateralAmount[i];
             } else {
@@ -503,11 +491,8 @@ contract LoanNex is Ownable, ERC1155Holder {
     function claimCollateralasBorrower(uint256 lenderRegistryId_) public {
         LoanInfo memory loan = Loans[lenderRegistryId_];
         LoanNexNFT ownerContract = LoanNexNFT(loanNexNFT);
-        // 1. Check if the sender is the owner of the borrowers's NFT
-        // 2. Check if the paymenyCount is different than the paids
-        // 3. Check if the loan has already been executed
         if (
-            ownerContract.ownerOf(loan.collateralOwnerID) != msg.sender || loan.paymentCount != loan.paymentsPaid
+            ownerContract.ownerOf(loan.collateralOwnerId) != msg.sender || loan.paymentCount != loan.paymentsPaid
                 || loan.executed == true
         ) {
             revert();
@@ -564,11 +549,11 @@ contract LoanNex is Ownable, ERC1155Holder {
         loanNexNFT = _newAddress;
     }
 
-    function getOfferLenderData(uint256 id_) public view returns (LenderOInfo memory) {
+    function getOfferLenderData(uint256 id_) public view returns (LenderOfferInfo memory) {
         return LendersOffers[id_];
     }
 
-    function getOfferCollateralData(uint256 id_) public view returns (CollateralOInfo memory) {
+    function getOfferCollateralData(uint256 id_) public view returns (Collateral memory) {
         return CollateralOffers[id_];
     }
 

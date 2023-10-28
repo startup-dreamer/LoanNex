@@ -1,297 +1,5 @@
 // Sources flattened with hardhat v2.14.0 https://hardhat.org
 
-// File @openzeppelin/contracts/utils/Context.sol@v4.8.3
-
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
-
-pragma solidity ^0.8.0;
-
-/**
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view virtual returns (bytes calldata) {
-        return msg.data;
-    }
-}
-
-
-// File @openzeppelin/contracts/access/Ownable.sol@v4.8.3
-
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.7.0) (access/Ownable.sol)
-
-pragma solidity ^0.8.0;
-
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
-abstract contract Ownable is Context {
-    address private _owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor() {
-        _transferOwnership(_msgSender());
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        _checkOwner();
-        _;
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if the sender is not the owner.
-     */
-    function _checkOwner() internal view virtual {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual onlyOwner {
-        _transferOwnership(address(0));
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        _transferOwnership(newOwner);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Internal function without access restriction.
-     */
-    function _transferOwnership(address newOwner) internal virtual {
-        address oldOwner = _owner;
-        _owner = newOwner;
-        emit OwnershipTransferred(oldOwner, newOwner);
-    }
-}
-
-
-// File @openzeppelin/contracts/utils/introspection/IERC165.sol@v4.8.3
-
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
-
-pragma solidity ^0.8.0;
-
-/**
- * @dev Interface of the ERC165 standard, as defined in the
- * https://eips.ethereum.org/EIPS/eip-165[EIP].
- *
- * Implementers can declare support of contract interfaces, which can then be
- * queried by others ({ERC165Checker}).
- *
- * For an implementation, see {ERC165}.
- */
-interface IERC165 {
-    /**
-     * @dev Returns true if this contract implements the interface defined by
-     * `interfaceId`. See the corresponding
-     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]
-     * to learn more about how these ids are created.
-     *
-     * This function call must use less than 30 000 gas.
-     */
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
-}
-
-
-// File @openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol@v4.8.3
-
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.5.0) (token/ERC1155/IERC1155Receiver.sol)
-
-pragma solidity ^0.8.0;
-
-/**
- * @dev _Available since v3.1._
- */
-interface IERC1155Receiver is IERC165 {
-    /**
-     * @dev Handles the receipt of a single ERC1155 token type. This function is
-     * called at the end of a `safeTransferFrom` after the balance has been updated.
-     *
-     * NOTE: To accept the transfer, this must return
-     * `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))`
-     * (i.e. 0xf23a6e61, or its own function selector).
-     *
-     * @param operator The address which initiated the transfer (i.e. msg.sender)
-     * @param from The address which previously owned the token
-     * @param id The ID of the token being transferred
-     * @param value The amount of tokens being transferred
-     * @param data Additional data with no specified format
-     * @return `bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"))` if transfer is allowed
-     */
-    function onERC1155Received(
-        address operator,
-        address from,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) external returns (bytes4);
-
-    /**
-     * @dev Handles the receipt of a multiple ERC1155 token types. This function
-     * is called at the end of a `safeBatchTransferFrom` after the balances have
-     * been updated.
-     *
-     * NOTE: To accept the transfer(s), this must return
-     * `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))`
-     * (i.e. 0xbc197c81, or its own function selector).
-     *
-     * @param operator The address which initiated the batch transfer (i.e. msg.sender)
-     * @param from The address which previously owned the token
-     * @param ids An array containing ids of each token being transferred (order and length must match values array)
-     * @param values An array containing amounts of each token being transferred (order and length must match ids array)
-     * @param data Additional data with no specified format
-     * @return `bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"))` if transfer is allowed
-     */
-    function onERC1155BatchReceived(
-        address operator,
-        address from,
-        uint256[] calldata ids,
-        uint256[] calldata values,
-        bytes calldata data
-    ) external returns (bytes4);
-}
-
-
-// File @openzeppelin/contracts/utils/introspection/ERC165.sol@v4.8.3
-
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)
-
-pragma solidity ^0.8.0;
-
-/**
- * @dev Implementation of the {IERC165} interface.
- *
- * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check
- * for the additional interface id that will be supported. For example:
- *
- * ```solidity
- * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
- *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);
- * }
- * ```
- *
- * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.
- */
-abstract contract ERC165 is IERC165 {
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC165).interfaceId;
-    }
-}
-
-
-// File @openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol@v4.8.3
-
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (token/ERC1155/utils/ERC1155Receiver.sol)
-
-pragma solidity ^0.8.0;
-
-
-/**
- * @dev _Available since v3.1._
- */
-abstract contract ERC1155Receiver is ERC165, IERC1155Receiver {
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return interfaceId == type(IERC1155Receiver).interfaceId || super.supportsInterface(interfaceId);
-    }
-}
-
-
-// File @openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol@v4.8.3
-
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.5.0) (token/ERC1155/utils/ERC1155Holder.sol)
-
-pragma solidity ^0.8.0;
-
-/**
- * Simple implementation of `ERC1155Receiver` that will allow a contract to hold ERC1155 tokens.
- *
- * IMPORTANT: When inheriting this contract, you must include a way to use the received tokens, otherwise they will be
- * stuck.
- *
- * @dev _Available since v3.1._
- */
-contract ERC1155Holder is ERC1155Receiver {
-    function onERC1155Received(
-        address,
-        address,
-        uint256,
-        uint256,
-        bytes memory
-    ) public virtual override returns (bytes4) {
-        return this.onERC1155Received.selector;
-    }
-
-    function onERC1155BatchReceived(
-        address,
-        address,
-        uint256[] memory,
-        uint256[] memory,
-        bytes memory
-    ) public virtual override returns (bytes4) {
-        return this.onERC1155BatchReceived.selector;
-    }
-}
-
-
 // File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.8.3
 
 // SPDX-License-Identifier: MIT
@@ -405,6 +113,34 @@ interface IERC20Metadata is IERC20 {
      * @dev Returns the decimals places of the token.
      */
     function decimals() external view returns (uint8);
+}
+
+
+// File @openzeppelin/contracts/utils/Context.sol@v4.8.3
+
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
+
+pragma solidity ^0.8.0;
+
+/**
+ * @dev Provides information about the current execution context, including the
+ * sender of the transaction and its data. While these are generally available
+ * via msg.sender and msg.data, they should not be accessed in such a direct
+ * manner, since when dealing with meta-transactions the account sending and
+ * paying for execution may not be the actual sender (as far as an application
+ * is concerned).
+ *
+ * This contract is only required for intermediate, library-like contracts.
+ */
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address) {
+        return msg.sender;
+    }
+
+    function _msgData() internal view virtual returns (bytes calldata) {
+        return msg.data;
+    }
 }
 
 
@@ -796,6 +532,35 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         address to,
         uint256 amount
     ) internal virtual {}
+}
+
+
+// File @openzeppelin/contracts/utils/introspection/IERC165.sol@v4.8.3
+
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
+
+pragma solidity ^0.8.0;
+
+/**
+ * @dev Interface of the ERC165 standard, as defined in the
+ * https://eips.ethereum.org/EIPS/eip-165[EIP].
+ *
+ * Implementers can declare support of contract interfaces, which can then be
+ * queried by others ({ERC165Checker}).
+ *
+ * For an implementation, see {ERC165}.
+ */
+interface IERC165 {
+    /**
+     * @dev Returns true if this contract implements the interface defined by
+     * `interfaceId`. See the corresponding
+     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]
+     * to learn more about how these ids are created.
+     *
+     * This function call must use less than 30 000 gas.
+     */
+    function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
 
@@ -1250,6 +1015,37 @@ library Address {
         } else {
             revert(errorMessage);
         }
+    }
+}
+
+
+// File @openzeppelin/contracts/utils/introspection/ERC165.sol@v4.8.3
+
+// SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)
+
+pragma solidity ^0.8.0;
+
+/**
+ * @dev Implementation of the {IERC165} interface.
+ *
+ * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check
+ * for the additional interface id that will be supported. For example:
+ *
+ * ```solidity
+ * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+ *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);
+ * }
+ * ```
+ *
+ * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.
+ */
+abstract contract ERC165 is IERC165 {
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(IERC165).interfaceId;
     }
 }
 
@@ -2519,7 +2315,7 @@ contract LoanNexNFT is ERC721Enumerable {
     }
 
     modifier onlyDeployer() {
-        require(msg.sender == deployer && !initialized, "Only deployer can call this function");
+        require(msg.sender == deployer || !initialized, "Only deployer can call this function");
         _;
     }
 
@@ -2679,585 +2475,5 @@ contract LoanNexNFT is ERC721Enumerable {
             )
         );
         return data;
-    }
-}
-
-
-// File contracts/LoanNex.sol
-
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
-
-
-
-
-contract LoanNex is Ownable, ERC1155Holder {
-    // Time period for the loan in seconds
-    uint256 constant COUNTDOWN_PERIOD = 12 hours;
-    // Id of the Lender Offer ID
-    uint256 public lenderRegistryId;
-    // Id of the Collateral Offer ID
-    uint256 public lastCollateralOfferId;
-
-    uint256 public LOAN_ID;
-    // Address of the NFT Contract
-    address loanNexNFT;
-    // Id count of the ownership NFT minted
-    uint32 NFT_ID;
-
-    bool private initialized;
-
-    // Lender & Collateral struct is the same right now, will be one  --> struct OfferInfo {}
-    struct LenderOInfo {
-        address lenderToken;
-        address[] wantedCollateralTokens;
-        uint256[] wantedCollateralAmount;
-        uint256 lenderAmount;
-        uint256 interest;
-        uint256 timelap;
-        uint256 paymentCount;
-        address[] whitelist;
-        address owner;
-    }
-
-    struct CollateralOInfo {
-        address requireLenderToken;
-        address[] collaterals;
-        uint256[] collateralAmount;
-        uint256 wantedlenderAmount;
-        uint256 interest;
-        uint256 timelap;
-        uint256 paymentCount;
-        address[] whitelist;
-        address owner;
-    }
-
-    struct LoanInfo {
-        uint32 collateralOwnerID;
-        uint32 lenderOwnerId;
-        address lenderToken;
-        uint256 cooldown;
-        uint256 lenderAmount;
-        address[] collaterals;
-        uint256[] collateralAmount;
-        uint256 timelap;
-        uint256 paymentCount;
-        uint256 paymentsPaid;
-        uint256 paymentAmount;
-        uint256 deadline;
-        uint256 deadlineNext;
-        bool executed;
-    }
-
-    // Lender ID => All Info About the Offer
-    mapping(uint256 => LenderOInfo) internal LendersOffers;
-    // Collateral ID => All Info About the Collateral
-    mapping(uint256 => CollateralOInfo) internal CollateralOffers;
-    // Loan ID => All Info about the Loan
-    mapping(uint256 => LoanInfo) internal Loans;
-    // NFT ID => Loan ID
-    mapping(uint256 => uint256) public loansByNft;
-    // NFT ID => CLAIMEABLE DEBT
-    mapping(uint256 => uint256) public claimeableDebt;
-
-    event LenderOfferCreated(
-        uint256 indexed lenderRegistryId,
-        address indexed owner,
-        address lendingToken,
-        uint256 apr,
-        uint256 lendingAmount
-    );
-    event LenderOfferDeleted(uint256 indexed lenderRegistryId, address indexed owner);
-    event CollateralOfferCreated(
-        uint256 indexed lenderRegistryId,
-        address indexed owner,
-        address lendingToken,
-        uint256 apr,
-        uint256 lendingAmount
-    );
-    event CollateralOfferDeleted(uint256 indexed lenderRegistryId, address indexed owner);
-    event LoanAccepted(uint256 newId, address indexed lendingToken, address[] indexed collateralTokens);
-
-    constructor() {}
-
-    modifier onlyInit() {
-        require(msg.sender == owner() || initialized, "Not initialized");
-        _;
-        initialized = true;
-    }
-
-    /**
-     * @dev Creates a lender option for offering a loan by the lender.
-     * @param lenderToken_ The address of the token that the lender wants to lend.
-     * @param wantedCollateralTokens_ An array of addresses representing the collateral tokens desired by the lender.
-     * @param wantedCollateralAmount_ An array of corresponding amounts of the collateral tokens desired by the lender.
-     * @param lenderAmount_ The amount of the lender's token to be lent.
-     * @param interest_ The interest rate for the loan. 10 --> 1% && 1 --> 0.1%
-     * @param timelap_ The time period for the loan in seconds.
-     * @param paymentCount_ The number of payments expected from the borrower.
-     * @param whitelist_ An array of whitelisted addresses.
-     */
-    function createLenderOption(
-        address lenderToken_,
-        address[] memory wantedCollateralTokens_,
-        uint256[] memory wantedCollateralAmount_,
-        uint256 lenderAmount_,
-        uint256 interest_,
-        uint256 timelap_,
-        uint256 paymentCount_,
-        address[] memory whitelist_
-    ) public payable {
-        require(
-            timelap_ >= 1 days && timelap_ <= 365 days
-                && wantedCollateralTokens_.length == wantedCollateralAmount_.length && lenderAmount_ != 0
-                && paymentCount_ <= 50 && paymentCount_ <= lenderAmount_ && whitelist_.length <= 2 && interest_ <= 10000,
-            "Invalid lender option parameters"
-        );
-
-        if (lenderToken_ == address(0x0)) {
-            // If the lender's token is XDR (address(0x0)), check if the transaction value is greater than or equal to the lender amount
-            require(msg.value >= lenderAmount_);
-        } else {
-            // If the lender's token is not XDR, transfer the lender amount from the sender to the contract address
-            IERC20 _landerToken = IERC20(lenderToken_);
-            // Check Taxable Tokens --> If it's taxable token, revert
-            uint256 balanceBefore = _landerToken.balanceOf(address(this));
-            bool success = _landerToken.transferFrom(msg.sender, address(this), lenderAmount_);
-            require(success, "Tx failed");
-            uint256 balanceAfter = _landerToken.balanceOf(address(this));
-            require((balanceAfter - balanceBefore) == lenderAmount_, "Taxable Token");
-        }
-
-        lenderRegistryId++;
-        // Create a new LenderOInfo struct with the provided information
-        LenderOInfo memory lastLender = LenderOInfo({
-            lenderToken: lenderToken_,
-            wantedCollateralTokens: wantedCollateralTokens_,
-            wantedCollateralAmount: wantedCollateralAmount_,
-            lenderAmount: lenderAmount_,
-            interest: interest_,
-            timelap: timelap_,
-            paymentCount: paymentCount_,
-            whitelist: whitelist_,
-            owner: msg.sender
-        });
-        LendersOffers[lenderRegistryId] = lastLender;
-        emit LenderOfferCreated(lenderRegistryId, msg.sender, lenderToken_, interest_, lenderAmount_);
-    }
-
-    // Cancel Lender Offer
-    function cancelLenderOffer(uint256 lenderRegistryId_) public {
-        LenderOInfo memory lenderInfo = LendersOffers[lenderRegistryId_];
-        if (lenderInfo.owner != msg.sender) {
-            revert();
-        }
-        delete LendersOffers[lenderRegistryId_];
-        if (lenderInfo.lenderToken != address(0x0)) {
-            IERC20 _landerToken = IERC20(lenderInfo.lenderToken);
-            bool success = _landerToken.transfer(msg.sender, lenderInfo.lenderAmount);
-            require(success);
-        } else {
-            (bool success,) = msg.sender.call{value: lenderInfo.lenderAmount}("");
-            require(success, "Transaction failed");
-        }
-        emit LenderOfferDeleted(lenderRegistryId_, msg.sender);
-    }
-
-    /**
-     * @dev Creates a collateral offer for a loan by the borrower.
-     * @param requireLenderToken_ The address of the token that the borrower wants to borrow.
-     * @param collateralTokens_ An array of addresses representing the collateral tokens being offered.
-     * @param collateralAmount_ An array of corresponding amounts of the collateral tokens being offered.
-     * @param wantedlenderAmount_ The desired amount of the lender's token by the borrower.
-     * @param interest_ The interest rate for the loan.  1 --> 0.1%
-     * @param timelap_ The time period for the loan in seconds.
-     * @param paymentCount_ The number of payments to be made by the borrower.
-     * @param whitelist_ An array of whitelisted addresses.
-     */
-
-    function createCollateralOffer(
-        address requireLenderToken_,
-        address[] memory collateralTokens_,
-        uint256[] memory collateralAmount_,
-        uint256 wantedlenderAmount_,
-        uint256 interest_,
-        uint256 timelap_,
-        uint256 paymentCount_,
-        address[] memory whitelist_
-    ) public payable {
-        require(
-            timelap_ >= 1 days && timelap_ <= 365 days && collateralTokens_.length == collateralAmount_.length
-                && wantedlenderAmount_ != 0 && paymentCount_ <= 50 && paymentCount_ <= wantedlenderAmount_
-                && whitelist_.length <= 2 && interest_ <= 10000,
-            "Invalid collateral offer parameters"
-        );
-
-        uint256 amountWei;
-        for (uint256 i; i < collateralTokens_.length; i++) {
-            if (collateralTokens_[i] == address(0x0)) {
-                // Check if the collateral token is XDR (address(0x0)) and Sum up the collateral amount in Wei
-                amountWei += collateralAmount_[i];
-            } else {
-                // If the collateral token is not XDR, transfer the collateral amount from the sender to the contract address
-                IERC20 collateralToken = IERC20(collateralTokens_[i]);
-                uint256 balanceBefore = collateralToken.balanceOf(address(this));
-                bool success = collateralToken.transferFrom(msg.sender, address(this), collateralAmount_[i]);
-                require(success);
-                uint256 balanceAfter = collateralToken.balanceOf(address(this));
-                require((balanceAfter - balanceBefore) == collateralAmount_[i], "Taxable Token");
-            }
-        }
-        // Check if the transaction value is greater than or equal to the total collateral amount in Wei
-        require(msg.value >= amountWei, "Not Enough XDR");
-
-        lastCollateralOfferId++;
-        // Create a new CollateralOInfo struct with the provided information
-        CollateralOInfo memory lastCollateral = CollateralOInfo({
-            requireLenderToken: requireLenderToken_,
-            collaterals: collateralTokens_,
-            collateralAmount: collateralAmount_,
-            wantedlenderAmount: wantedlenderAmount_,
-            interest: interest_,
-            timelap: timelap_,
-            paymentCount: paymentCount_,
-            whitelist: whitelist_,
-            owner: msg.sender
-        });
-        CollateralOffers[lastCollateralOfferId] = lastCollateral;
-        emit CollateralOfferCreated(
-            lastCollateralOfferId, msg.sender, requireLenderToken_, interest_, wantedlenderAmount_
-        );
-    }
-
-    function cancelCollateralOffer(uint256 id_) public {
-        CollateralOInfo memory collateralInfo = CollateralOffers[id_];
-        require(collateralInfo.owner == msg.sender, "Sender is not the owner");
-        delete CollateralOffers[id_]; // Deleting info before transfering anything
-        // Iterate over the collateral tokens and transfer them back to the owner
-        for (uint256 i; i < collateralInfo.collateralAmount.length; i++) {
-            if (collateralInfo.collaterals[i] != address(0x0)) {
-                IERC20 token = IERC20(collateralInfo.collaterals[i]);
-                bool success = token.transfer(msg.sender, collateralInfo.collateralAmount[i]);
-                require(success);
-            } else {
-                (bool success,) = msg.sender.call{value: collateralInfo.collateralAmount[i]}("");
-                require(success, "Transaction failed");
-            }
-        }
-        emit CollateralOfferDeleted(id_, msg.sender);
-    }
-
-    /**
-     * @dev Accepts a collateral offer and initiates a loan.
-     * @param id_ The ID of the collateral offer to accept.
-     */
-    function acceptCollateralOffer(uint256 id_) public payable {
-        CollateralOInfo memory collateralInfo = CollateralOffers[id_];
-        require(collateralInfo.owner != address(0x0), "Offer does not exists.");
-        // Check if Whitelist exists and if the sender is whitelisted
-
-        if (
-            collateralInfo.whitelist.length > 0
-                && (collateralInfo.whitelist[0] != msg.sender && collateralInfo.whitelist[1] != msg.sender)
-        ) {
-            revert();
-        }
-
-        delete CollateralOffers[id_]; // Delete the collateral offer from the mapping
-
-        // Send Tokens to Collateral Owner
-
-        if (collateralInfo.requireLenderToken == address(0x0)) {
-            require(msg.value >= collateralInfo.wantedlenderAmount, "Not Enough XDR");
-            (bool success,) = collateralInfo.owner.call{value: collateralInfo.wantedlenderAmount}("");
-            require(success, "Transaction Error");
-        } else {
-            IERC20 wantedToken = IERC20(collateralInfo.requireLenderToken);
-            uint256 balanceBefore = wantedToken.balanceOf(collateralInfo.owner);
-            bool success = wantedToken.transferFrom(msg.sender, collateralInfo.owner, collateralInfo.wantedlenderAmount);
-            require(success, "Error");
-            uint256 balanceAfter = wantedToken.balanceOf(collateralInfo.owner);
-            require((balanceAfter - balanceBefore) == collateralInfo.wantedlenderAmount, "Taxable Token");
-        }
-
-        // Update States & Mint NFTS (ID % 2 == 0 = 'BORROWER' && ID % 2 == 1 = 'LENDER')
-        NFT_ID += 2;
-        LOAN_ID++;
-        LoanNexNFT loanNex = LoanNexNFT(loanNexNFT);
-        for (uint256 i; i < 2; i++) {
-            loanNex.mint();
-            if (i == 0) {
-                loanNex.transferFrom(address(this), msg.sender, NFT_ID - 1);
-                loansByNft[NFT_ID - 1] = LOAN_ID;
-            } else {
-                loanNex.transferFrom(address(this), collateralInfo.owner, NFT_ID);
-                loansByNft[NFT_ID] = LOAN_ID;
-            }
-            // Transfer to new owners
-        }
-        // Save Loan Info
-        uint256 paymentPerTime;
-
-        // Calculate payment per time based on payment count and interest
-        paymentPerTime = (
-            (collateralInfo.wantedlenderAmount / collateralInfo.paymentCount) * (1000 + collateralInfo.interest)
-        ) / 1000;
-
-        // Calculate Deadline
-        uint256 globalDeadline = (collateralInfo.paymentCount * collateralInfo.timelap) + block.timestamp;
-        uint256 nextDeadline = block.timestamp + collateralInfo.timelap;
-
-        // Save Mapping Info
-        Loans[LOAN_ID] = LoanInfo({
-            collateralOwnerID: NFT_ID,
-            lenderOwnerId: NFT_ID - 1,
-            lenderToken: collateralInfo.requireLenderToken,
-            cooldown: block.timestamp,
-            lenderAmount: collateralInfo.wantedlenderAmount,
-            collaterals: collateralInfo.collaterals,
-            collateralAmount: collateralInfo.collateralAmount,
-            timelap: collateralInfo.timelap,
-            paymentCount: collateralInfo.paymentCount,
-            paymentsPaid: 0,
-            paymentAmount: paymentPerTime,
-            deadline: globalDeadline,
-            deadlineNext: nextDeadline,
-            executed: false
-        });
-        emit CollateralOfferDeleted(id_, msg.sender);
-        emit LoanAccepted(LOAN_ID, collateralInfo.requireLenderToken, collateralInfo.collaterals);
-    }
-
-    function acceptLenderOffer(uint256 lenderRegistryId_) public payable {
-        LenderOInfo memory lenderInfo = LendersOffers[lenderRegistryId_];
-        require(lenderInfo.owner != address(0x0), "Offer Expired");
-        // Check Whitelist
-        if (
-            lenderInfo.whitelist.length > 0
-                && (lenderInfo.whitelist[0] != msg.sender && lenderInfo.whitelist[1] != msg.sender)
-        ) {
-            revert();
-        }
-
-        delete LendersOffers[lenderRegistryId_];
-        uint256 amountWei;
-
-        // Send Collaterals to this contract
-        for (uint256 i; i < lenderInfo.wantedCollateralTokens.length; i++) {
-            if (lenderInfo.wantedCollateralTokens[i] == address(0x0)) {
-                amountWei += lenderInfo.wantedCollateralAmount[i];
-            } else {
-                IERC20 wantedToken = IERC20(lenderInfo.wantedCollateralTokens[i]);
-                uint256 balanceBefore = wantedToken.balanceOf(address(this));
-                bool success = wantedToken.transferFrom(msg.sender, address(this), lenderInfo.wantedCollateralAmount[i]);
-                require(success);
-                uint256 balanceAfter = wantedToken.balanceOf(address(this));
-                require((balanceAfter - balanceBefore) == lenderInfo.wantedCollateralAmount[i], "Taxable Token");
-            }
-        }
-
-        require(msg.value >= amountWei, "Not enough XDR");
-        // Update States & Mint NFTS
-        NFT_ID += 2;
-        LOAN_ID++;
-        LoanNexNFT loanNex = LoanNexNFT(loanNexNFT);
-
-        for (uint256 i; i < 2; i++) {
-            loanNex.mint();
-            if (i == 0) {
-                loanNex.transferFrom(address(this), lenderInfo.owner, NFT_ID - 1);
-                loansByNft[NFT_ID - 1] = LOAN_ID;
-            } else {
-                loanNex.transferFrom(address(this), msg.sender, NFT_ID);
-                loansByNft[NFT_ID] = LOAN_ID;
-            }
-        }
-
-        uint256 paymentPerTime =
-            ((lenderInfo.lenderAmount / lenderInfo.paymentCount) * (1000 + lenderInfo.interest)) / 1000;
-
-        // Calculate loan deadlines
-        uint256 globalDeadline = (lenderInfo.paymentCount * lenderInfo.timelap) + block.timestamp;
-        uint256 nextDeadline = block.timestamp + lenderInfo.timelap;
-        // Store loan information in the mapping
-        Loans[LOAN_ID] = LoanInfo({
-            collateralOwnerID: NFT_ID,
-            lenderOwnerId: NFT_ID - 1,
-            lenderToken: lenderInfo.lenderToken,
-            cooldown: block.timestamp,
-            lenderAmount: lenderInfo.lenderAmount,
-            collaterals: lenderInfo.wantedCollateralTokens,
-            collateralAmount: lenderInfo.wantedCollateralAmount,
-            timelap: lenderInfo.timelap,
-            paymentCount: lenderInfo.paymentCount,
-            paymentsPaid: 0,
-            paymentAmount: paymentPerTime,
-            deadline: globalDeadline,
-            deadlineNext: nextDeadline,
-            executed: false
-        });
-        // Send Loan to the owner of the collateral
-        if (lenderInfo.lenderToken == address(0x0)) {
-            (bool success,) = msg.sender.call{value: lenderInfo.lenderAmount}("");
-            require(success, "Transaction Error");
-        } else {
-            IERC20 lenderToken = IERC20(lenderInfo.lenderToken);
-            bool success = lenderToken.transfer(msg.sender, lenderInfo.lenderAmount);
-            require(success);
-        }
-
-        emit LenderOfferDeleted(lenderRegistryId_, msg.sender);
-        emit LoanAccepted(LOAN_ID, lenderInfo.lenderToken, lenderInfo.wantedCollateralTokens);
-    }
-
-    function payDebt(uint256 lenderRegistryId_) public payable {
-        LoanInfo memory loan = Loans[lenderRegistryId_];
-        LoanNexNFT ownerContract = LoanNexNFT(loanNexNFT);
-
-        // Check conditions for valid debt payment
-        // Revert the transaction if any condition fail
-
-        // 1. Check if the loan final deadline has passed
-        // 2. Check if the sender is the owner of the collateral associated with the loan
-        // 3. Check if all payments have been made for the loan
-        // 4. Check if the loan collateral has already been executed
-        if (
-            loan.deadline < block.timestamp || ownerContract.ownerOf(loan.collateralOwnerID) != msg.sender
-                || loan.paymentsPaid == loan.paymentCount || loan.executed == true
-        ) {
-            revert();
-        }
-
-        uint256 interestPerPayment = ((loan.paymentAmount * loan.paymentCount) - loan.lenderAmount) / loan.paymentCount;
-
-        // Increment the number of payments made
-        loan.paymentsPaid += 1;
-        // Update the deadline for the next payment
-        loan.deadlineNext += loan.timelap;
-        Loans[lenderRegistryId_] = loan;
-        claimeableDebt[loan.lenderOwnerId] += loan.paymentAmount;
-
-        if (loan.lenderToken == address(0x0)) {
-            require(msg.value >= loan.paymentAmount);
-        } else {
-            IERC20 lenderToken = IERC20(loan.lenderToken);
-            bool success = lenderToken.transferFrom(msg.sender, address(this), loan.paymentAmount);
-            require(success);
-        }
-        // Update the claimable debt for the lender
-        // Ensure the token transfer was successful
-    }
-
-    function claimCollateralasLender(uint256 lenderRegistryId_) public {
-        LoanInfo memory loan = Loans[lenderRegistryId_];
-        LoanNexNFT ownerContract = LoanNexNFT(loanNexNFT);
-        // 1. Check if the sender is the owner of the lender's NFT
-        // 2. Check if the deadline for the next payment has passed
-        // 3. Check if all payments have been made for the loan
-        // 4. Check if the loan has already been executed
-        if (
-            ownerContract.ownerOf(loan.lenderOwnerId) != msg.sender || loan.deadlineNext > block.timestamp
-                || loan.paymentCount == loan.paymentsPaid || loan.executed == true
-        ) {
-            revert();
-        }
-        // Mark the loan as executed
-        loan.executed = true;
-        Loans[lenderRegistryId_] = loan;
-        uint256 amountWei;
-
-        // Iterate over the collateralTokens and collateralAmount arrays in the loan
-        for (uint256 i; i < loan.collaterals.length; i++) {
-            if (loan.collaterals[i] == address(0x0)) {
-                // Check if the collateral token is XDR (address(0x0))
-                // Sum up the collateral amount in Wei
-                amountWei += loan.collateralAmount[i];
-            } else {
-                IERC20 token = IERC20(loan.collaterals[i]);
-                bool success = token.transfer(msg.sender, loan.collateralAmount[i]);
-                require(success);
-            }
-        }
-        // Transfer the Wei amount to the lender's address
-        if (amountWei > 0) {
-            (bool success,) = msg.sender.call{value: amountWei}("");
-            require(success);
-        }
-    }
-
-    function claimCollateralasBorrower(uint256 lenderRegistryId_) public {
-        LoanInfo memory loan = Loans[lenderRegistryId_];
-        LoanNexNFT ownerContract = LoanNexNFT(loanNexNFT);
-        // 1. Check if the sender is the owner of the borrowers's NFT
-        // 2. Check if the paymenyCount is different than the paids
-        // 3. Check if the loan has already been executed
-        if (
-            ownerContract.ownerOf(loan.collateralOwnerID) != msg.sender || loan.paymentCount != loan.paymentsPaid
-                || loan.executed == true
-        ) {
-            revert();
-        }
-
-        loan.executed = true;
-        uint256 amountWei;
-        Loans[lenderRegistryId_] = loan;
-
-        for (uint256 i; i < loan.collaterals.length; i++) {
-            if (loan.collaterals[i] == address(0x0)) {
-                amountWei += loan.collateralAmount[i];
-            } else {
-                IERC20 token = IERC20(loan.collaterals[i]);
-                // Transfer the Wei amount to the lender's address
-                bool successF = token.transfer(msg.sender, loan.collateralAmount[i]);
-                require(successF);
-            }
-        }
-        // Transfer the Wei amount to the lender's address
-        if (amountWei > 0) {
-            (bool success,) = msg.sender.call{value: amountWei}("");
-            require(success);
-        }
-    }
-
-    function claimDebt(uint256 lenderRegistryId_) public {
-        LoanInfo memory LOAN_INFO = Loans[lenderRegistryId_];
-        LoanNexNFT ownerContract = LoanNexNFT(loanNexNFT);
-        uint256 amount = claimeableDebt[LOAN_INFO.lenderOwnerId];
-
-        // 1. Check if the sender is the owner of the lender's NFT
-        // 2. Check if there is an amount available to claim
-        if (ownerContract.ownerOf(LOAN_INFO.lenderOwnerId) != msg.sender || amount == 0) {
-            revert();
-        }
-        // Delete the claimable debt amount for the lender
-        delete claimeableDebt[LOAN_INFO.lenderOwnerId];
-        LOAN_INFO.cooldown = block.timestamp + COUNTDOWN_PERIOD;
-        Loans[lenderRegistryId_] = LOAN_INFO;
-
-        if (LOAN_INFO.lenderToken == address(0x0)) {
-            (bool success,) = msg.sender.call{value: amount}("");
-            require(success, "Transaction Failed");
-        } else {
-            IERC20 lenderToken = IERC20(LOAN_INFO.lenderToken);
-            // Transfer the debt amount of the token to the lender's address
-            bool success = lenderToken.transfer(msg.sender, amount);
-            require(success);
-        }
-    }
-
-    function setNFTContract(address _newAddress) public onlyInit {
-        loanNexNFT = _newAddress;
-    }
-
-    function getOfferLenderData(uint256 id_) public view returns (LenderOInfo memory) {
-        return LendersOffers[id_];
-    }
-
-    function getOfferCollateralData(uint256 id_) public view returns (CollateralOInfo memory) {
-        return CollateralOffers[id_];
-    }
-
-    function getLoansData(uint256 id_) public view returns (LoanInfo memory) {
-        return Loans[id_];
     }
 }
