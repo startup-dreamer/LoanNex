@@ -1,7 +1,7 @@
 const { ethers, run } = require("hardhat");
 
 /**
- * Deploys the BorrowXCore contract with the specified parameters and verifies the contract.
+ * Deploys the LoanNex contract with the specified parameters and verifies the contract.
  * @returns {Promise<void>}
  */
 
@@ -43,31 +43,3 @@ main()
     console.error(error);
     process.exit(1);
   });
-
-//   const { ethers } = require("hardhat");
-
-// async function main() {
-//   const options = {
-//     gasPrice: 125 * 10 ** 9,
-//     // Other transaction options...
-//   };
-  
-//   const Debita = await ethers.getContractFactory("DebitaV1");
-//   const loanNexNFT = await ethers.getContractFactory("loanNexNFT");
-//   const loanNex = await Debita.deploy(options);
-//   const loanNexNFT = await loanNexNFT.deploy(options);
-//   console.log(loanNex.target, 'DEBITA');
-//   console.log(loanNexNFT.target, 'loanNexNFT');
-
-//   await loanNexNFT.setDebitaContract(loanNex.target, options);
-//   await loanNex.setNFTContract(loanNexNFT.target, options);
-//   console.log('FINISHED');
-
-// }
-
-// // We recommend this pattern to be able to use async/await everywhere
-// // and properly handle errors.
-// main().catch((error) => {
-//   console.error(error);
-//   process.exitCode = 1;
-// });
